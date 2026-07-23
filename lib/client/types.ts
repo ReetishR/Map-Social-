@@ -107,7 +107,19 @@ export interface RecommendationDTO {
   confidence: Confidence;
   explanation: string;
   tradeoff: string | null;
+  editorialSummary: string | null;
+  mapsUrl: string | null;
+  photos: string[];
+  reviews: VenueReviewDTO[];
   createdAt: string;
+}
+
+export interface VenueReviewDTO {
+  authorName: string;
+  rating: number;
+  relativeTime: string;
+  text: string;
+  profilePhotoUrl: string | null;
 }
 
 export interface VoteDTO {

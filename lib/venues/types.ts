@@ -69,6 +69,21 @@ export interface VenueSearchParams {
   radiusKm: number;
 }
 
+export interface VenueReview {
+  authorName: string;
+  rating: number;
+  relativeTime: string;
+  text: string;
+  profilePhotoUrl: string | null;
+}
+
+export interface VenueDetails {
+  photos: string[];
+  reviews: VenueReview[];
+  editorialSummary: string | null;
+  mapsUrl: string | null;
+}
+
 export interface VenueProvider {
   readonly name: "mock" | "google";
   geocode(query: string): Promise<GeocodeResult | null>;
@@ -80,4 +95,6 @@ export interface VenueProvider {
     mode: TransportModeKey,
     departureMinuteOfDay?: number,
   ): Promise<TravelEstimate>;
+  /** Only implemented by providers backed by a real venue database (e.g. Google). */
+  getVenueDetails?(venueId: string): Promise<VenueDetails | null>;
 }

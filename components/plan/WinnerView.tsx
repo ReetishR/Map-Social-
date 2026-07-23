@@ -161,6 +161,27 @@ export function WinnerView({
             {plan.time ? ` at ${plan.time}` : ""} · ~₹{winner.estimatedCostPerPerson}/person
           </p>
 
+          {winner.editorialSummary && (
+            <p className="text-xs italic text-text-faint">&ldquo;{winner.editorialSummary}&rdquo;</p>
+          )}
+
+          {winner.photos.length > 0 && (
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+              {winner.photos.map((src) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={src}
+                  src={src}
+                  alt={`${winner.venueName} photo`}
+                  className="h-16 w-16 flex-shrink-0 rounded-lg object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-2">
             {participants.map((p) => {
               const travel = winner.travelBreakdown.find((t) => t.participantId === p.id);
@@ -178,6 +199,13 @@ export function WinnerView({
                 🧭 Directions
               </Button>
             </a>
+            {winner.mapsUrl && (
+              <a href={winner.mapsUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="secondary" size="sm">
+                  📍 Google Maps
+                </Button>
+              </a>
+            )}
             <Button variant="secondary" size="sm" onClick={downloadCalendar}>
               📅 Add to calendar
             </Button>
@@ -185,6 +213,25 @@ export function WinnerView({
               🔗 Share plan
             </Button>
           </div>
+
+          {winner.reviews.length > 0 && (
+            <div className="flex flex-col gap-3 rounded-lg bg-white/5 p-3">
+              <span className="text-xs font-medium text-text-muted">What people say</span>
+              {winner.reviews.slice(0, 3).map((review, i) => (
+                <div key={i} className="flex flex-col gap-1 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-text">{review.authorName}</span>
+                    <span className="text-text-faint">{review.relativeTime}</span>
+                  </div>
+                  <div className="text-amber">
+                    {"★".repeat(review.rating)}
+                    {"☆".repeat(5 - review.rating)}
+                  </div>
+                  <p className="text-text-muted line-clamp-3">{review.text}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </Panel>
 

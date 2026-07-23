@@ -152,6 +152,11 @@ model Recommendation {
   explanation String
   tradeoff    String?
 
+  editorialSummary String?
+  mapsUrl          String?
+  photos           String  @default("[]") // JSON string[] (additional photo URLs, beyond imageUrl)
+  reviews          String  @default("[]") // JSON: [{ authorName, rating, relativeTime, text, profilePhotoUrl }]
+
   createdAt DateTime @default(now())
 
   votes Vote[]

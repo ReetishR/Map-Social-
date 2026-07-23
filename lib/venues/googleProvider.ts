@@ -4,7 +4,9 @@ import type {
   TravelEstimate,
   TransportModeKey,
   Venue,
+  VenueDetails,
   VenueProvider,
+  VenueReview,
   VenueSearchParams,
 } from "./types";
 import { categoryImage } from "./placeholderImage";
@@ -53,6 +55,21 @@ interface GooglePlaceResult {
   rating?: number;
   user_ratings_total?: number;
   photos?: { photo_reference: string }[];
+}
+
+interface GooglePlaceReview {
+  author_name: string;
+  rating: number;
+  relative_time_description: string;
+  text: string;
+  profile_photo_url?: string;
+}
+
+interface GooglePlaceDetailsResult {
+  photos?: { photo_reference: string }[];
+  reviews?: GooglePlaceReview[];
+  editorial_summary?: { overview?: string };
+  url?: string;
 }
 
 async function fetchJson(url: string) {
@@ -168,6 +185,37 @@ class GoogleVenueProvider implements VenueProvider {
       transfers: 0,
       confidence: "HIGH",
       feasible: true,
+    };
+  }
+
+  async getVenueDetails(venueId: string): Promise<VenueDetails | null> {
+    const placeId = venueId.startsWith("google-") ? venueId.slice("google-".length) : venueId;
+    const fields = "photo,review,editorial_summary,url";
+    const url =
+      `https://maps.googleapis.com/maps/api/place/details/json` +
+      `?place_id=${encodeURIComponent(placeId)}&fields=${fields}&key=${apiKey()}`;
+
+    const data = await fetchJson(url);
+    if (data.status !== "OK") return null;
+    const result = data.result as GooglePlaceDetailsResult;
+
+    const photos = (result.photos ?? [])
+      .slice(0, 6)
+      .map((p) => `/api/venue-photo?ref=${encodeURIComponent(p.photo_reference)}`);
+
+    const reviews: VenueReview[] = (result.reviews ?? []).slice(0, 5).map((r) => ({
+      authorName: r.author_name,
+      rating: r.rating,
+      relativeTime: r.relative_time_description,
+      text: r.text,
+      profilePhotoUrl: r.profile_photo_url ?? null,
+    }));
+
+    return {
+      photos,
+      reviews,
+      editorialSummary: result.editorial_summary?.overview ?? null,
+      mapsUrl: result.url ?? null,
     };
   }
 }

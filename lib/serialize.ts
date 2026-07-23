@@ -95,8 +95,20 @@ export function serializeRecommendation(r: Recommendation) {
     confidence: r.confidence,
     explanation: r.explanation,
     tradeoff: r.tradeoff,
+    editorialSummary: r.editorialSummary,
+    mapsUrl: r.mapsUrl,
+    photos: safeParse<string[]>(r.photos, []),
+    reviews: safeParse<VenueReviewDTO[]>(r.reviews, []),
     createdAt: r.createdAt,
   };
+}
+
+interface VenueReviewDTO {
+  authorName: string;
+  rating: number;
+  relativeTime: string;
+  text: string;
+  profilePhotoUrl: string | null;
 }
 
 export function serializeVote(v: Vote) {

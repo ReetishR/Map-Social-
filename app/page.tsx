@@ -47,6 +47,10 @@ const DEMO_RECS: RecommendationDTO[] = [
     explanation:
       "Best Overall because everyone can arrive within approximately 45 minutes, it fits the group's ₹1,300 budget, and it is five minutes from a metro station.",
     tradeoff: null,
+    editorialSummary: null,
+    mapsUrl: null,
+    photos: [],
+    reviews: [],
     createdAt: "",
   },
   {
@@ -78,6 +82,10 @@ const DEMO_RECS: RecommendationDTO[] = [
     confidence: "MEDIUM",
     explanation: "Most Convenient because most of the group arrives in under 30 minutes on average.",
     tradeoff: "one participant may have a notably longer journey, around 49 minutes",
+    editorialSummary: null,
+    mapsUrl: null,
+    photos: [],
+    reviews: [],
     createdAt: "",
   },
   {
@@ -109,6 +117,10 @@ const DEMO_RECS: RecommendationDTO[] = [
     confidence: "MEDIUM",
     explanation: "Wild Card because it brings something a bit different to the usual spots.",
     tradeoff: null,
+    editorialSummary: null,
+    mapsUrl: null,
+    photos: [],
+    reviews: [],
     createdAt: "",
   },
 ];

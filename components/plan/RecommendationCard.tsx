@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import clsx from "clsx";
 import { Badge } from "@/components/ui/Badge";
@@ -41,6 +42,7 @@ export function RecommendationCard({
 }) {
   const meta = LABEL_META[rec.label] ?? LABEL_META.BEST_OVERALL;
   const priceDisplay = rec.priceLevel ? "₹".repeat(rec.priceLevel) : "";
+  const [showReviews, setShowReviews] = useState(false);
 
   return (
     <motion.div
@@ -87,6 +89,23 @@ export function RecommendationCard({
           ))}
         </div>
 
+        {rec.photos.length > 0 && (
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
+            {rec.photos.map((src) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={src}
+                src={src}
+                alt={`${rec.venueName} photo`}
+                className="h-14 w-14 flex-shrink-0 rounded-lg object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            ))}
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="rounded-lg bg-white/5 px-3 py-2">
             <div className="text-text-faint text-xs">Avg travel</div>
@@ -112,15 +131,56 @@ export function RecommendationCard({
             <span aria-hidden>⚠</span> {rec.tradeoff}
           </p>
         )}
+        {rec.editorialSummary && (
+          <p className="text-xs italic text-text-faint">&ldquo;{rec.editorialSummary}&rdquo;</p>
+        )}
+
+        {rec.reviews.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={() => setShowReviews((v) => !v)}
+              className="w-fit text-xs text-text-muted underline decoration-dotted underline-offset-4 hover:text-text"
+            >
+              {showReviews ? "Hide" : "Read"} Google reviews ({rec.reviews.length})
+            </button>
+            {showReviews && (
+              <div className="flex flex-col gap-3 rounded-lg bg-white/5 p-3">
+                {rec.reviews.map((review, i) => (
+                  <div key={i} className="flex flex-col gap-1 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-text">{review.authorName}</span>
+                      <span className="text-text-faint">{review.relativeTime}</span>
+                    </div>
+                    <div className="text-amber">{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}</div>
+                    <p className="text-text-muted line-clamp-3">{review.text}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {interactive && (
           <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-            <button
-              onClick={onViewMap}
-              className="text-xs text-text-muted underline decoration-dotted underline-offset-4 hover:text-text"
-            >
-              View on map
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={onViewMap}
+                className="text-xs text-text-muted underline decoration-dotted underline-offset-4 hover:text-text"
+              >
+                View on map
+              </button>
+              {rec.mapsUrl && (
+                <a
+                  href={rec.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-text-muted underline decoration-dotted underline-offset-4 hover:text-text"
+                >
+                  Google Maps ↗
+                </a>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               {voteCount !== undefined && (
                 <span className="text-xs text-text-faint">

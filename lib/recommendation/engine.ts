@@ -338,6 +338,10 @@ export async function generateRecommendations(
       groupMatchScore: Math.round(composite * 100),
       scoreBreakdown,
       confidence: confidenceFor(venue, travel, plan.time),
+      editorialSummary: null,
+      mapsUrl: null,
+      photos: [],
+      reviews: [],
     });
   }
 
@@ -358,6 +362,25 @@ export async function generateRecommendations(
     mostConvenient && labelRecommendation(mostConvenient, "MOST_CONVENIENT", located.length, groupBudget),
     wildCard && labelRecommendation(wildCard, "WILD_CARD", located.length, groupBudget),
   ].filter((x): x is RecommendationLabelled => Boolean(x));
+
+  // Only enrich the venues the group will actually see (not every candidate
+  // considered) — Place Details is a separately billed call from Nearby Search.
+  if (venueProvider.getVenueDetails) {
+    await Promise.all(
+      recommendations.map(async (rec) => {
+        try {
+          const details = await venueProvider.getVenueDetails!(rec.venueId);
+          if (!details) return;
+          rec.photos = details.photos;
+          rec.reviews = details.reviews;
+          rec.editorialSummary = details.editorialSummary;
+          rec.mapsUrl = details.mapsUrl;
+        } catch {
+          // Enrichment is best-effort; the recommendation still stands without it.
+        }
+      }),
+    );
+  }
 
   return { recommendations, noResult: null };
 }

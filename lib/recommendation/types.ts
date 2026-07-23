@@ -1,4 +1,4 @@
-import type { TransportModeKey } from "@/lib/venues";
+import type { TransportModeKey, VenueReview } from "@/lib/venues";
 
 export type PreferenceStrength = "MUST_HAVE" | "STRONG" | "NICE_TO_HAVE" | "NONE";
 
@@ -71,6 +71,11 @@ export interface ScoredRecommendation {
   groupMatchScore: number;
   scoreBreakdown: Record<string, number>;
   confidence: "HIGH" | "MEDIUM" | "LOW";
+
+  editorialSummary: string | null;
+  mapsUrl: string | null;
+  photos: string[];
+  reviews: VenueReview[];
 }
 
 export interface RecommendationLabelled extends ScoredRecommendation {
