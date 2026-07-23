@@ -8,6 +8,7 @@ import type {
   VenueSearchParams,
 } from "./types";
 import { categoryImage } from "./placeholderImage";
+import { nearestNeighborhood } from "./neighborhoods";
 
 // Maps WhereTo activity categories to Google Places "included types" / keyword fallback.
 const CATEGORY_TO_PLACE_TYPE: Record<string, string> = {
@@ -99,14 +100,16 @@ class GoogleVenueProvider implements VenueProvider {
     return results.map((raw): Venue => {
       const r = raw as GooglePlaceResult;
       const priceLevel = (r.price_level ?? 2) + 1;
+      const lat = r.geometry.location.lat;
+      const lng = r.geometry.location.lng;
       return {
         id: `google-${r.place_id}`,
         name: r.name,
         category: params.category,
-        neighborhood: params.near ? "" : "",
+        neighborhood: nearestNeighborhood({ lat, lng }).name,
         address: r.vicinity ?? "",
-        lat: r.geometry.location.lat,
-        lng: r.geometry.location.lng,
+        lat,
+        lng,
         priceLevel: Math.min(4, Math.max(1, priceLevel)) as 1 | 2 | 3 | 4,
         estimatedCostPerPerson: priceLevel * 400,
         rating: r.rating ?? 4,
@@ -125,7 +128,7 @@ class GoogleVenueProvider implements VenueProvider {
         childFriendly: false,
         hours: { open: "11:00", close: "23:00" },
         imageUrl: r.photos?.[0]
-          ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${r.photos[0].photo_reference}&key=${apiKey()}`
+          ? `/api/venue-photo?ref=${encodeURIComponent(r.photos[0].photo_reference)}`
           : categoryImage(params.category),
         novelty: 0.5,
         popularity: Math.min(1, (r.user_ratings_total ?? 0) / 2000),

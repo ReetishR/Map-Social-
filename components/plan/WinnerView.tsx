@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Panel } from "@/components/ui/Panel";
 import { Badge } from "@/components/ui/Badge";
 import { categoryIcon } from "@/lib/categories";
+import { VenueImage } from "@/components/plan/VenueImage";
 import { submitFeedback, ApiError } from "@/lib/client/api";
 import type { ParticipantDTO, PlanDTO, RecommendationDTO } from "@/lib/client/types";
 
@@ -143,8 +144,12 @@ export function WinnerView({
 
       <Panel className="glow-lime flex flex-col gap-4 overflow-hidden p-0">
         <div className="relative h-44 w-full">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={winner.imageUrl ?? ""} alt={winner.venueName} className="h-full w-full object-cover" />
+          <VenueImage
+            src={winner.imageUrl}
+            category={winner.category}
+            alt={winner.venueName}
+            className="h-full w-full object-cover"
+          />
         </div>
         <div className="flex flex-col gap-3 p-5">
           <h2 className="font-display text-2xl font-semibold">

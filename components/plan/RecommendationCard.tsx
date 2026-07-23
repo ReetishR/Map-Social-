@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { categoryIcon } from "@/lib/categories";
+import { VenueImage } from "@/components/plan/VenueImage";
 import type { RecommendationDTO } from "@/lib/client/types";
 
 const LABEL_META: Record<
@@ -52,8 +53,12 @@ export function RecommendationCard({
       )}
     >
       <div className="relative h-36 w-full overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={rec.imageUrl ?? ""} alt={rec.venueName} className="h-full w-full object-cover" />
+        <VenueImage
+          src={rec.imageUrl}
+          category={rec.category}
+          alt={rec.venueName}
+          className="h-full w-full object-cover"
+        />
         <div className="absolute left-3 top-3">
           <Badge accent={meta.accent} className={clsx("backdrop-blur", meta.glow)}>
             {meta.text}
