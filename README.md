@@ -14,18 +14,22 @@ See `PRD.MD` / `TRD.MD` for the full product spec this implements.
 
 - **Next.js 16** (App Router, Turbopack) + React 19 + TypeScript
 - **Tailwind CSS v4** — dark, neon, game-lobby visual style
-- **Prisma 7** + SQLite (via the `better-sqlite3` driver adapter) for local dev
+- **Prisma 7** + **Postgres** (via the `pg` driver adapter)
 - **Framer Motion** for the map reveal / card / winner animations
 - A pluggable venue/travel-time provider: a built-in **mock Bangalore
   dataset** (no API key needed) that automatically upgrades to **Google Maps
-  Platform** (Places, Distance Matrix, Geocoding) the moment
-  `GOOGLE_MAPS_API_KEY` is set.
+  Platform** (Places, Distance Matrix, Geocoding, and Place Details for
+  reviews/photos) the moment `GOOGLE_MAPS_API_KEY` is set.
 
 ## Getting started
 
+You need a Postgres database — a local one, or a free one from
+[Neon](https://neon.tech)/[Supabase](https://supabase.com) work fine.
+
 ```bash
 npm install
-npx prisma migrate dev   # creates dev.db from prisma/schema.prisma
+cp .env.example .env        # then fill in DATABASE_URL (and optionally GOOGLE_MAPS_API_KEY)
+npx prisma migrate dev      # applies prisma/migrations to your database
 npm run dev
 ```
 
@@ -33,9 +37,24 @@ Open [http://localhost:3000](http://localhost:3000). No API keys are required
 to use the full app — recommendations are generated from a realistic mock
 dataset of Bangalore venues and travel times.
 
-Copy `.env.example` to `.env.local` if you want to add a
-`GOOGLE_MAPS_API_KEY` later; the app detects it automatically and switches
-providers.
+## Deploying to Vercel
+
+1. Push this repo to GitHub (already done if you're reading this on the
+   branch), then in the Vercel dashboard: **Add New → Project** and import it.
+2. In the project's **Storage** tab, add the **Neon** integration (or any
+   Postgres) — this creates a `DATABASE_URL` for you automatically. If you
+   provisioned a database elsewhere instead, add `DATABASE_URL` yourself
+   under **Settings → Environment Variables**.
+3. Optionally add `GOOGLE_MAPS_API_KEY` under the same Environment Variables
+   screen to use real venues, reviews, and photos instead of the mock data.
+4. Deploy. The build script (`prisma generate && prisma migrate deploy && next
+   build`) applies migrations automatically — no manual DB setup step needed
+   beyond having `DATABASE_URL` set before the first deploy.
+
+Note: `pg` connects over standard Postgres wire protocol, so any Postgres
+works (Neon, Supabase, RDS, a VPS) — Neon's pooled connection string is
+recommended on Vercel since serverless functions open many short-lived
+connections.
 
 ## How it works
 
