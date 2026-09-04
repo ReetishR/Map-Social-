@@ -1,0 +1,190 @@
+// WhereTo data model — see PRD.MD / TRD.MD for the product spec this implements.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PlanStatus {
+  LOBBY
+  GENERATING
+  REVIEWING
+  VOTING
+  CONFIRMED
+  CANCELLED
+}
+
+enum PrivacyLevel {
+  EXACT_PRIVATE
+  APPROXIMATE_AREA
+  NEIGHBORHOOD
+  LANDMARK
+}
+
+enum TransportMode {
+  CAR
+  TWO_WHEELER
+  AUTO_TAXI
+  METRO
+  BUS
+  WALK
+}
+
+enum RecommendationLabel {
+  BEST_OVERALL
+  MOST_CONVENIENT
+  WILD_CARD
+  BEST_VALUE
+  FAIREST_COMMUTE
+  HIDDEN_GEM
+}
+
+enum ConfidenceLevel {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model Plan {
+  id             String @id @default(cuid())
+  slug           String @unique
+  organizerToken String @unique
+
+  title                String
+  activity             String
+  date                 String?
+  time                 String?
+  groupSizeEstimate    Int?
+  budgetPerPerson      Int?
+  initialLocationLabel String?
+  responseDeadline     DateTime?
+
+  status         PlanStatus @default(LOBBY)
+  rerollsUsed    Int        @default(0)
+  rerollsAllowed Int        @default(1)
+
+  confirmedRecommendationId String?
+  confirmedAt               DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  participants    Participant[]
+  recommendations Recommendation[]
+  votes           Vote[]
+  feedback        Feedback[]
+}
+
+model Participant {
+  id           String  @id @default(cuid())
+  planId       String
+  plan         Plan    @relation(fields: [planId], references: [id], onDelete: Cascade)
+  sessionToken String  @unique
+  isOrganizer  Boolean @default(false)
+
+  name          String
+  locationLabel String?
+  lat           Float?
+  lng           Float?
+  privacyLevel  PrivacyLevel @default(APPROXIMATE_AREA)
+
+  transportMode     TransportMode?
+  altTransportModes String  @default("[]") // JSON string[]
+  maxWalkingMinutes Int?
+  maxTransfers      Int?
+  maxTravelMinutes  Int?
+  budget            Int?
+  availability      String?
+
+  preferredCategories String @default("[]") // JSON string[]
+  cuisine             String @default("[]") // JSON string[]
+  dietary             String @default("[]") // JSON string[]
+  preferences         String @default("{}") // JSON: { key: { value, strength } }
+  hardConstraints     String @default("[]") // JSON: [{ key, value }]
+
+  isReady   Boolean  @default(false)
+  joinedAt  DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  votes Vote[]
+
+  @@index([planId])
+}
+
+model Recommendation {
+  id     String @id @default(cuid())
+  planId String
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  generationBatch Int
+  label           RecommendationLabel
+  secondaryLabel  String?
+
+  venueId                String?
+  venueName              String
+  category               String
+  address                String?
+  neighborhood           String?
+  lat                    Float
+  lng                    Float
+  priceLevel             Int?
+  estimatedCostPerPerson Int?
+  rating                 Float?
+  reviewCount            Int?
+  imageUrl               String?
+  vibeTags               String  @default("[]") // JSON string[]
+  metroProximityMinutes  Int?
+  parkingAvailable       Boolean?
+  openingHours           String?
+
+  travelBreakdown  String @default("[]") // JSON: [{ participantId, minutes, mode }]
+  avgTravelMinutes Float
+  maxTravelMinutes Float
+  fairnessScore    Float
+  groupMatchScore  Float
+  scoreBreakdown   String @default("{}") // JSON component scores
+
+  confidence  ConfidenceLevel
+  explanation String
+  tradeoff    String?
+
+  editorialSummary String?
+  mapsUrl          String?
+  photos           String  @default("[]") // JSON string[] (additional photo URLs, beyond imageUrl)
+  reviews          String  @default("[]") // JSON: [{ authorName, rating, relativeTime, text, profilePhotoUrl }]
+
+  createdAt DateTime @default(now())
+
+  votes Vote[]
+
+  @@index([planId, generationBatch])
+}
+
+model Vote {
+  id               String         @id @default(cuid())
+  planId           String
+  plan             Plan           @relation(fields: [planId], references: [id], onDelete: Cascade)
+  participantId    String         @unique
+  participant      Participant    @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  recommendationId String
+  recommendation   Recommendation @relation(fields: [recommendationId], references: [id], onDelete: Cascade)
+  createdAt        DateTime       @default(now())
+
+  @@index([planId])
+}
+
+model Feedback {
+  id              String   @id @default(cuid())
+  planId          String
+  plan            Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  participantName String?
+  rating          Int
+  comment         String?
+  createdAt       DateTime @default(now())
+
+  @@index([planId])
+}
