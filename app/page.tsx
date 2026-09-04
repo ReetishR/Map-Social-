@@ -184,6 +184,12 @@ export default function Home() {
                 </Button>
               </Link>
             </div>
+            <Link
+              href="/demo"
+              className="w-fit text-sm text-text-muted underline decoration-dotted underline-offset-4 hover:text-text"
+            >
+              ▶ Watch a live demo — no setup, no account
+            </Link>
           </motion.div>
 
           <motion.div

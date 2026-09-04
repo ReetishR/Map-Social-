@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { categoryIcon } from "@/lib/categories";
 import { VenueImage } from "@/components/plan/VenueImage";
+import { ScoreMatrix } from "@/components/plan/ScoreMatrix";
 import type { RecommendationDTO } from "@/lib/client/types";
 
 const LABEL_META: Record<
@@ -43,6 +44,7 @@ export function RecommendationCard({
   const meta = LABEL_META[rec.label] ?? LABEL_META.BEST_OVERALL;
   const priceDisplay = rec.priceLevel ? "₹".repeat(rec.priceLevel) : "";
   const [showReviews, setShowReviews] = useState(false);
+  const [showMatrix, setShowMatrix] = useState(false);
 
   return (
     <motion.div
@@ -66,9 +68,14 @@ export function RecommendationCard({
             {meta.text}
           </Badge>
         </div>
-        <div className="absolute right-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-xs font-display font-semibold backdrop-blur">
-          Match {rec.groupMatchScore}%
-        </div>
+        <button
+          type="button"
+          onClick={() => setShowMatrix((v) => !v)}
+          className="absolute right-3 top-3 rounded-full bg-black/50 px-2.5 py-1 text-xs font-display font-semibold backdrop-blur transition-colors hover:bg-black/70"
+          title="See the weighted decision matrix"
+        >
+          Match {rec.groupMatchScore}% {showMatrix ? "▾" : "▸"}
+        </button>
       </div>
 
       <div className="flex flex-1 flex-col gap-3 p-5">
@@ -80,6 +87,8 @@ export function RecommendationCard({
             {rec.neighborhood} · {priceDisplay || "₹"} · {rec.rating}★ ({rec.reviewCount} reviews)
           </p>
         </div>
+
+        {showMatrix && <ScoreMatrix scoreBreakdown={rec.scoreBreakdown} />}
 
         <div className="flex flex-wrap gap-1.5 text-xs">
           {rec.vibeTags.slice(0, 4).map((t) => (
